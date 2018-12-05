@@ -1,0 +1,23 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+    - cloudify/types/types.yaml
+    - ns->blueprint:imported_scripts
+
+node_templates:
+    node:
+        type: cloudify.nodes.Root
+        interfaces:
+            test:
+                op1:
+                  implementation: scripts/operations/op1.py
+                  executor: central_deployment_agent
+                op2:
+                  implementation: scripts/operations/op2.sh
+                  executor: central_deployment_agent
+                op3:
+                  implementation: scripts/operations/op3.py
+                  executor: central_deployment_agent
+
+workflows:
+    workflow: scripts/workflows/workflow.py

@@ -83,3 +83,23 @@ class TestScriptMapping(AgentlessTestCase):
 
         finally:
             self.execute_on_manager('rm -rf {0}'.format(deployment_folder))
+
+    def test_script_mapping_in_namespace_import(self):
+        basic_blueprint_path = resource('dsl/test_script_mapping.yaml')
+        self.client.blueprints.upload(basic_blueprint_path,
+                                      entity_id='imported_scripts')
+        dsl_path = resource('dsl/blueprint_with_namespaced_blueprint_import.yaml')
+        deployment, _ = self.deploy_application(dsl_path)
+        self.execute_workflow('workflow', deployment.id)
+
+        data = self.get_plugin_data(plugin_name='script',
+                                    deployment_id=deployment.id)
+        self.assertEqual(data['op1_called_with_property'], 'op2_called')
+        self.assertEqual(data['op2_prop'], 'op2_value')
+        # Running imported wf and scripts
+        self.execute_workflow('ns->workflow', deployment.id)
+
+        data = self.get_plugin_data(plugin_name='script',
+                                    deployment_id=deployment.id)
+        self.assertEqual(data['op1_called_with_property'], 'op2_called')
+        self.assertEqual(data['op2_prop'], 'op2_value')
